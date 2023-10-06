@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: bva
+  name: bva
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bva
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: bva
+    spec:
+      containers:
+      - image: phpmyadmin/phpmyadmin
+        name: phpmyadmin
+        ports:
+        - containerPort: 80
+        env:
+        - name: BVA_HOST
+          value: mysql
+        - name: BVA_PORT
+          value: "3306"
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root_password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bva-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: bva
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
